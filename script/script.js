@@ -6,16 +6,26 @@ let allTasks = JSON.parse(localStorage.getItem('allTasks')) || []
 //Now display all the previous tasks tasks
 taskNumber = allTasks.length
 for (let index = 0; index < taskNumber; index++) {
-    console.log(index);
     displayTask(allTasks[index]);
 
 }
-document.getElementById('taskForm').addEventListener('submit', function(event) {
+// acces the id of the last task
+let taskId
+if (taskNumber >= 1){
+    taskId = allTasks[taskNumber-1].id || 0;
+console.log(taskId);
+} else {
+    taskId = 0
+}
+
+let taskForm = document.getElementById('taskForm')
+if (taskForm){
+    taskForm.addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the default form submission
 
     // create an object with the data comming from the form
     const oneTaskData = {
-        id: taskNumber++,
+        id: ++taskId,
         task: this.elements['task'].value,
         description: this.elements['description'].value,
         prioritize: this.elements['prioritize'].checked
@@ -26,6 +36,7 @@ document.getElementById('taskForm').addEventListener('submit', function(event) {
     localStorage.setItem('allTasks', JSON.stringify(allTasks));
     console.log(allTasks);
 
+
     displayTask(oneTaskData);
 
     // Output the object (you can perform further actions with it)
@@ -34,7 +45,7 @@ document.getElementById('taskForm').addEventListener('submit', function(event) {
     this.reset(); // Reset form 
 
 });
-
+}
 function displayTask(taskObjet) {
 if (taskObjet !== null) {
     // create a div tag to display the task
@@ -42,19 +53,19 @@ if (taskObjet !== null) {
     taskDiv.innerHTML = `
       <p>ID: ${taskObjet.id}</p>
       <h2>${taskObjet.task} </h2>
-      <span id= "${taskObjet.id}" class = "trash" >&#128465;</span> 
+      <span id= 'task${taskObjet.id}' class = 'edit'> &#9998; </span>
+      <span id= "${taskObjet.id}" class = "trash" >&#128465;</span>
       <p>${taskObjet.description}</p>
       <hr>
     `;
     if (taskObjet.prioritize) {taskDiv.classList.add('prioritize');}
+    taskDiv.id = `task-${taskObjet.id}`
 
     // Display the task data on the screen
     const displayDiv = document.getElementById('displayTasks');
-    displayDiv.appendChild(taskDiv);
-
-
+    if(displayDiv !== null){ displayDiv.appendChild(taskDiv);}
 }}
-
+/// DELETES TASKS
 // Get all elements with the class 'trash'
 const trashIcons = document.querySelectorAll('.trash');
 
@@ -63,7 +74,7 @@ trashIcons.forEach(trashIcon => {
   trashIcon.addEventListener('click', function(event) {
     // Access the ID of the clicked task
     const clickedId = event.target.id;
-    // Perform an action with the ID (for example, delete the corresponding task)
+    //catch the tag with the coressponding id, then if it exists, delete it
     const taskToDelete = document.getElementById(clickedId);
     console.log(clickedId);
     if (taskToDelete) {
@@ -71,16 +82,92 @@ trashIcons.forEach(trashIcon => {
     }
   });
 });
+/// delete all tasks
+const deleteAll = document.getElementById('deleteAll');
+    // Add an event listener to the element
+    if (deleteAll) {
+    deleteAll.addEventListener('click', function(event) {
+      localStorage.allTasks = null; // delete all tasks
+      location.reload();
+    })
+}
 
 function deleteOneTask(idToDelete) {
    allTasks = allTasks.filter(task => task.id !== +idToDelete);
     localStorage.setItem('allTasks', JSON.stringify(allTasks));
-    console.log(allTasks);
-
-
-    // location.reload();
+    location.reload();
 }
 
-function updateOneTask(id) {
-    //update tasks
+
+/////////////Updating tasks////////////////
+
+// Get all elements with the class 'trash'
+const editIcons = document.querySelectorAll('.edit');
+
+// Iterate through each edit icon and attach a click event listener
+editIcons.forEach(editIcon => {
+  editIcon.addEventListener('click', function(event) {
+    // Access the ID of the clicked task
+    const clickedId = event.target.id;
+    const clickedIdNumber = parseInt(clickedId.match(/\d+/)[0]) ;
+    //catch the tag with the coressponding id, then if it exists, delete it
+    const taskToUpdate = document.getElementById(`task-${clickedIdNumber}`); // the div that contains the task clicked
+
+    // get the task object to update 
+    
+    let theTask = allTasks.find(task => task.id == clickedIdNumber)
+    console.log(theTask);
+    const updateDiv = document.createElement('div');
+    updateDiv.innerHTML=`
+        <form id = 'updateForm'>
+        <label for="updateTask"> Update Task</label>
+        <input name = 'updateTask' type = 'text' value=${theTask.task} required ></input>
+        <label for="updateDescription"> Update Description</label>
+        <input name = 'updateDescription' type = 'text' value=${theTask.description}></input>
+        <input name = 'updatePrioritize' type = 'checkbox' value=${theTask.prioritize}></input>
+        <label for="updatePrioritize"> Priority</label>
+        <button type= "submit" >Modify</button>
+        </form>
+    `
+    taskToUpdate.appendChild(updateDiv);
+    console.log(clickedId);
+    console.log(clickedIdNumber);
+
+    let updateForm = document.getElementById('updateForm')
+    if (updateForm){
+    updateForm.addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // create an object with the data comming from the form
+    const updatedData = {
+        task: this.elements['updateTask'].value,
+        description: this.elements['updateDescription'].value,
+        prioritize: this.elements['updatePrioritize'].checked
+    };
+
+    updateOneTask(clickedIdNumber, updatedData); // call the function to update the task
+    
+    function updateOneTask(id_task, objectTask) {
+        allTasks = allTasks.map(task => {
+            if (task.id == id_task) {
+                task.task = objectTask.task;
+                task.description = objectTask.description;
+                task.prioritize = objectTask.prioritize;
+            }
+            return task;
+        })
+        localStorage.setItem('allTasks', JSON.stringify(allTasks));
+        console.log('Task updated, redirecting to index.html');
+        location.reload();
+    
+    }
+});
 }
+  });
+});
+
+
+
+
+
+
