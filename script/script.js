@@ -51,12 +51,12 @@ if (taskObjet !== null) {
     // create a div tag to display the task
     const taskDiv = document.createElement('div');
     taskDiv.innerHTML = `
-      <p>ID: ${taskObjet.id}</p>
-      <h2>${taskObjet.task} </h2>
-      <span id= 'task${taskObjet.id}' class = 'edit'> &#9998; </span>
-      <span id= "${taskObjet.id}" class = "trash" >&#128465;</span>
-      <p>${taskObjet.description}</p>
-      <hr>
+    <hr>
+      <ul><li>${taskObjet.task} </li></ul>
+      <p>&rarr; ${taskObjet.description}</p>
+      <span id= 'task${taskObjet.id}' class = 'edit'>Edit &#9998; </span>
+      <span id= "${taskObjet.id}" class = "trash" > Delete &#128465;</span>
+      
     `;
     if (taskObjet.prioritize) {taskDiv.classList.add('prioritize');}
     taskDiv.id = `task-${taskObjet.id}`
@@ -120,9 +120,9 @@ editIcons.forEach(editIcon => {
     const updateDiv = document.createElement('div');
     updateDiv.innerHTML=`
         <form id = 'updateForm'>
-        <label for="updateTask"> Update Task</label>
+        <label for="updateTask"> Update Task: </label>
         <input name = 'updateTask' type = 'text' value=${theTask.task} required ></input>
-        <label for="updateDescription"> Update Description</label>
+        <label for="updateDescription"> Update Description: </label>
         <input name = 'updateDescription' type = 'text' value=${theTask.description}></input>
         <input name = 'updatePrioritize' type = 'checkbox' value=${theTask.prioritize}></input>
         <label for="updatePrioritize"> Priority</label>
